@@ -6,6 +6,8 @@ Creates PR in deploy repo for stage and prod env
 
 Used on release
 
+In order to use these workflows you need to add secret for slack webhook named `SLACK_WEBHOOK_URL` in your repo
+
 #### Inputs
   - **image_repository**  The image repository for the built images, defaults to value of `Image.repository` from `values.yaml`
       - required No
@@ -38,12 +40,6 @@ Used on release
       - required No
       - default ''
 
-#### Secrets
-  - **gh_token**
-      - required Yes
-  - **slack_webhook_url**
-      - required No
-
 #### Example usage
 
  - Simplest possible example:
@@ -67,8 +63,6 @@ jobs:
       test_commands: |
         go run mage.go -v lint
         go run mage.go -v test
-    secrets:
-      gh_token: ${{ secrets.GH_TOKEN }}
-      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    secrets: inherit
 
 ```

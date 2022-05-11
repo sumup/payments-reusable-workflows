@@ -4,6 +4,8 @@ Builds image from Dockerfiles located in .deployment/docker sub-directory
 
 Used in PR or on push to branch ( not main/master )
 
+In order to use these workflows you need to add secret for slack webhook named `SLACK_WEBHOOK_URL` in your repo
+
 #### Inputs
 
   - **target** The build target if image needs to be build to sertain layer ex.builder
@@ -18,12 +20,6 @@ Used in PR or on push to branch ( not main/master )
   - **slack_channel** The slack channel where you want your messages being sent
       - required No
       - default ''
-
-#### Secrets
-  - **gh_token**
-      - required Yes
-  - **slack_webhook_url**
-      - required No
 
 #### Example usage
 
@@ -44,8 +40,5 @@ jobs:
       test_commands: |
         go run mage.go -v lint
         go run mage.go -v test
-    secrets:
-      gh_token: ${{ secrets.GH_TOKEN }}
-      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-
+    secrets: inherit
 ```

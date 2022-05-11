@@ -48,11 +48,7 @@ on:
         required: false
         default: ''
         type: string
-    secrets:
-      gh_token:
-        required: true
-      slack_webhook_url:
-        required: false
+
 jobs:
   application_build:
     runs-on: [ "self-hosted", "payments-tribe" ]
@@ -69,7 +65,7 @@ jobs:
         uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.gh_token }}
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
 
@@ -82,6 +78,7 @@ jobs:
           image_name: ${{ inputs.image_name }}
           image_tag: ${{ inputs.image_tag }}
           target: ${{ inputs.target }}
+          ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
 
       - name: "🧪 Run tests on development container"
         if: inputs.test_commands != ''
@@ -98,14 +95,14 @@ jobs:
           image_repository: ${{ inputs.image_repository }}
           image_name: ${{ inputs.image_name }}
           image_tag: ${{ inputs.image_tag }}
+          ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
 
       - name: "🔍 Scan container"
         id: call-scan-container
         uses: ./.github/payments-composite-actions/docker/trivy-scan
         with:
-          gh_token: ${{ secrets.gh_token }}
+          gh_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           image_full_name: ${{ steps.build-final-container.outputs.image_full_name }}
-          trivy_version: ${{ inputs.trivy_version }}
 
       - name: "🗃️ Publish container"
         id: call-publish-container
@@ -119,7 +116,7 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.slack_webhook_url }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
           message: "The Github Actions build has failed for image with "
@@ -168,7 +165,7 @@ jobs:
         uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.gh_token }}
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
 
@@ -186,7 +183,7 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.slack_webhook_url }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
           message: "Chart Build failed with "
@@ -209,7 +206,7 @@ jobs:
         uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.gh_token }}
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
 
@@ -219,7 +216,7 @@ jobs:
         with:
           deployment_config_path: ${{ inputs.stage_config_path }}
           deployment_environment: "Stage"
-          github_token: ${{ secrets.gh_token }}
+          github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
 
@@ -232,7 +229,7 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.slack_webhook_url }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
           message: "Failed to update deploy infra repository"
@@ -255,7 +252,7 @@ jobs:
         uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.gh_token }}
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
 
@@ -265,7 +262,7 @@ jobs:
         with:
           deployment_config_path: ${{ inputs.prod_config_path }}
           deployment_environment: "Prod"
-          github_token: ${{ secrets.gh_token }}
+          github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
 
@@ -278,7 +275,7 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.slack_webhook_url }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
           message: "Failed to update deploy infra repository"
@@ -294,7 +291,7 @@ jobs:
         uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.gh_token }}
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
 
@@ -302,7 +299,7 @@ jobs:
         if: ${{ success() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.slack_webhook_url }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           color: "good"
           message: "Build completed. Deploy Infra is updated, [Stage PR](https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_stage.outputs.pr_number }}) , [Production PR](https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_prod.outputs.pr_number }})"
 
