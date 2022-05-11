@@ -1,0 +1,136 @@
+name: Build Application Image Tests
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: The build target if the image needs to be build to a certain layer e.g. builder
+        required: false
+        default: 'builder'
+        type: string
+      test_commands:
+        description: The commands to run in the development container for executing tests/linting, one per line
+        required: false
+        default: ''
+        type: string
+      results_path:
+        description: The directory(in the container) where the results will be stored
+        required: false
+        default: /tmp
+        type: string
+      slack_channel:
+        description: The Slack channel where you want your notifications being sent
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  application_build:
+    runs-on: [ "self-hosted", "payments-tribe" ]
+    steps:
+      - name: "☁️ Check out project code"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          fetch-depth: 0
+
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          path: .github/payments-composite-actions
+          ref: 'main'
+
+      - name: "📦 Build development container"
+        id: build-development-container
+        if: inputs.test_commands != ''
+        uses: ./.github/payments-composite-actions/docker/build
+        with:
+          target: ${{ inputs.target }}
+          ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
+
+      - name: "🧪 Run tests in development container"
+        if: inputs.test_commands != ''
+        uses: ./.github/payments-composite-actions/docker/run-builder-tests
+        with:
+          image_full_name: ${{ steps.build-development-container.outputs.image_full_name }}
+          results_path: ${{ inputs.results_path }}
+          test_commands: ${{ inputs.test_commands }}
+
+      - name: "📦 Build final container"
+        id: build-final-container
+        uses: ./.github/payments-composite-actions/docker/build
+        with:
+          ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
+
+      - name: "🔍 Scan container"
+        id: call-scan-container
+        uses: ./.github/payments-composite-actions/docker/trivy-scan
+        with:
+          github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          image_full_name: ${{ steps.build-final-container.outputs.image_full_name }}
+
+      - name: "✉️ Send Slack message on failure"
+        if: ${{ failure() }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_channel: ${{ inputs.slack_channel }}
+          color: "danger"
+          message: "The Github Actions build has failed for ${{ steps.build-final-container.outputs.image_full_name }}"
+  ####
+  ####   CHART TEST
+  ####
+  chart_test:
+    runs-on: ["self-hosted", "payments-tribe"]
+    steps:
+      - name: "☁️ Check out project code"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          fetch-depth: 0
+
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          path: .github/payments-composite-actions
+          ref: 'main'
+
+      - name: "🧪 Test Helm chart"
+        uses: ./.github/payments-composite-actions/helm/ct-test
+
+      - name: "✉️ Send Slack message on failure"
+        if: ${{ failure() }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_channel: ${{ inputs.slack_channel }}
+          color: "danger"
+          message: "The Helm chart tests have failed!"
+  ####
+  ####   Send Slack notification
+  ####
+  notification:
+    runs-on: ["self-hosted", "payments-tribe"]
+    needs: [ 'application_build', 'chart_test' ]
+    steps:
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          path: .github/payments-composite-actions
+          ref: 'main'
+
+      - name: "✉️ Send slack message on success"
+        if: ${{ success() }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          color: "good"
+          message: "The application build has completed successfully!"
