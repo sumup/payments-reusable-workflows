@@ -16,9 +16,6 @@ Used on push to main/master branch
   - **image_tag** Built image tag, defaults to value of `Image.tag` from `values.yaml`
       - required No
       - default ''
-  - **ssh_agent_key** Used if during build dependencies/libraries require to be fetched from a  private repo
-      - required No
-      - default ''
   - **target** The build target if image needs to be build to sertain layer ex.builder
       - required No
       - default 'builder'
@@ -38,9 +35,6 @@ Used on push to main/master branch
   - **slack_channel** The slack channel where you want your messages being sent
       - required No
       - default ''
-  - **trivy_version** Version of trivy scanner
-      - required No
-      - default 0.27.1
 
 #### Secrets
   - **gh_token**

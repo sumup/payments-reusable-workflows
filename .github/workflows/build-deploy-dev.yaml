@@ -17,11 +17,6 @@ on:
         required: false
         default: ''
         type: string
-      ssh_agent_key:
-        description: Used if during build dependencies/libraries require to be fetched from a  private repo
-        required: false
-        default: ''
-        type: string
       target:
         description: The build target if image needs to be build to sertain layer ex.builder
         required: false
@@ -53,11 +48,6 @@ on:
         description: The slack channel where you want your messages being sent
         required: false
         default: ''
-        type: string
-      trivy_version:
-        description: Version of trivy scanner
-        required: false
-        default: '0.27.1'
         type: string
     secrets:
       gh_token:
