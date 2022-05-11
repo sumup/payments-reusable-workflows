@@ -62,8 +62,8 @@ on:
       - main
 
 jobs:
-  deploy-dev:
-    uses: sumup/payments-reusable-workflows/.github/workflows/build-deploy-dev.yaml
+  release:
+    uses: sumup/payments-reusable-workflows/.github/workflows/build-release.yaml
     with:
       image_repository: nexus.sam-app.ro:5001
       slack_channel: "channel"
