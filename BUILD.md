@@ -44,7 +44,7 @@ on:
 
 jobs:
   build:
-    uses: sumup/payments-reusable-workflows/.github/workflows/workflow-build.yaml
+    uses: sumup/payments-reusable-workflows/.github/workflows/build.yaml
     with:
       slack_channel: "channel"
       test_commands: |

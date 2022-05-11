@@ -61,12 +61,12 @@ on:
 
 jobs:
   deploy-dev:
-    uses: sumup/payments-reusable-workflows/.github/workflows/workflow-build-deploy-dev.yaml
+    uses: sumup/payments-reusable-workflows/.github/workflows/build-deploy-dev.yaml
     with:
       image_repository: nexus.sam-app.ro:5001
       slack_channel: "channel"
       deployment_config_path: projects/my-team/my-app/values-theta.yaml
-      chart_repository: s3://sumup-infra-helm-charts/my-team/
+      chart_repository: s3://helm-charts/my-team/
       test_commands: |
         go run mage.go -v lint
         go run mage.go -v test
