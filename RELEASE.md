@@ -8,6 +8,33 @@ Used on release
 
 In order to use these workflows you need to add secret for slack webhook named `SLACK_WEBHOOK_URL` in your repo
 
+#### Example usage
+
+ - Simplest possible example:
+
+```yaml
+name: Build,Test,Deploy to Stage and Prod
+on:  
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    uses: sumup/payments-reusable-workflows/.github/workflows/build-release.yaml
+    with:
+      image_repository: nexus.sam-app.ro:5001
+      slack_channel: "channel"
+      stage_config_path: projects/my-team/my-app/values-stage.yaml
+      prod_config_path: projects/my-team/my-app/values-prod.yaml
+      chart_repository: s3://helm-charts/my-team/
+      test_commands: |
+        go run mage.go -v lint
+        go run mage.go -v test
+    secrets: inherit
+
+```
+
 #### Inputs
   - **image_repository**  The image repository for the built images, defaults to value of `Image.repository` from `values.yaml`
       - required No
@@ -40,29 +67,3 @@ In order to use these workflows you need to add secret for slack webhook named `
       - required No
       - default ''
 
-#### Example usage
-
- - Simplest possible example:
-
-```yaml
-name: Build,Test,Deploy to Stage and Prod
-on:  
-  push:
-    branches:
-      - main
-
-jobs:
-  release:
-    uses: sumup/payments-reusable-workflows/.github/workflows/build-release.yaml
-    with:
-      image_repository: nexus.sam-app.ro:5001
-      slack_channel: "channel"
-      stage_config_path: projects/my-team/my-app/values-stage.yaml
-      prod_config_path: projects/my-team/my-app/values-prod.yaml
-      chart_repository: s3://helm-charts/my-team/
-      test_commands: |
-        go run mage.go -v lint
-        go run mage.go -v test
-    secrets: inherit
-
-```
