@@ -110,7 +110,7 @@ jobs:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
-          message: "The Helm chart tests have failed"
+          message: "The Helm chart tests have failed!"
   ####
   ####   Send Slack notification
   ####
