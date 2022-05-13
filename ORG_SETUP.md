@@ -10,8 +10,8 @@ To use the workflows you will need the following github secrets
 
  - **SLACK_WEBHOOK_URL** Slack web hook for sending messages.
 
-   This secret is optional
+   This secret is optional, if not set no notifications will be send via slack
 
  - **ACTIONS_SSH_AGENT_KEY** SSH key used to pull packages from private repositories during build
 
-   This secret is optional 
+   This secret is optional, if not set no ssh key will be mounted into the build. 
