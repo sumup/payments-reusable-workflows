@@ -1,0 +1,12 @@
+vendor/
+.idea/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+stdout-*
+*.log
+.DS_Store
+.DS_Store?
+._*
