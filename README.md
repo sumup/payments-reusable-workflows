@@ -1,10 +1,10 @@
-# Payments github actions reusable workflows
+# Payments Github Actions Reusable Workflows
+This repository contains Payments GH Actions reusable workflows
 
-In order to use these workflows you need to add secret for slack webhook named `SLACK_WEBHOOK_URL` in your repo
+### Build and Release documentation
+[Build workflow](docs/BUILD.md)
 
-[Build workflow](./BUILD.md)
+[Development workflow](docs/DEPLOY_DEV.md)
 
-[Development workflow](./DEPLOY_DEV.md)
-
-[Release workflow](./RELEASE.md)
+[Release workflow](docs/RELEASE.md)
 
