@@ -1,10 +1,10 @@
 # Payments Github Actions Reusable Workflows
 This repository contains Payments GH Actions reusable workflows
 
-## Documentation
-[Build workflow](./BUILD.md)
+### Build and Release documentation
+[Build workflow](docs/BUILD.md)
 
-[Development workflow](./DEPLOY_DEV.md)
+[Development workflow](docs/DEPLOY_DEV.md)
 
-[Release workflow](./RELEASE.md)
+[Release workflow](docs/RELEASE.md)
 
