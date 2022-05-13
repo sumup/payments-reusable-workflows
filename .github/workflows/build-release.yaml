@@ -212,7 +212,6 @@ jobs:
   notification:
     runs-on: ["self-hosted", "payments-tribe"]
     needs: ['deploy_stage', 'deploy_prod']
-    if: always() && needs.deploy_repo.result == 'success'
     steps:
       - name: "☁️ Check out payments composite actions"
         # actions checkout v 3.0.2
