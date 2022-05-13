@@ -32,15 +32,15 @@ on:
         required: false
         default: /tmp
         type: string
-      chart_repository:
-        required: true
-        type: string
+      # chart_repository:
+      #   required: true
+      #   type: string
       stage_config_path:
-        description: Path deploy repo Stage configurations 
+        description: Path deploy repo Stage configurations
         required: true
         type: string
       prod_config_path:
-        description: Path deploy repo Prod configurations 
+        description: Path deploy repo Prod configurations
         required: true
         type: string
       slack_channel:
@@ -51,18 +51,20 @@ on:
 
 jobs:
   application_build:
-    runs-on: [ "self-hosted", "payments-tribe" ]
+    runs-on: ["self-hosted", "payments-tribe"]
     outputs:
       image_tag: ${{ steps.build-final-container.outputs.image_tag }}
       imageSha: ${{ steps.build-final-container.outputs.imageSha }}
     steps:
       - name: "☁️ Check out project code"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           fetch-depth: 0
 
       - name: "☁️ Check out payments composite actions"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
@@ -101,7 +103,7 @@ jobs:
         id: call-scan-container
         uses: ./.github/payments-composite-actions/docker/trivy-scan
         with:
-          gh_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           image_full_name: ${{ steps.build-final-container.outputs.image_full_name }}
 
       - name: "🗃️ Publish container"
@@ -121,89 +123,94 @@ jobs:
           color: "danger"
           message: "The Github Actions build has failed for image with "
 ####
-####   CHART TEST AND BUILD
+####   CHART TEST AND BUILD  <<< this will never trigger ... should use the chart from latest master
 ####
-  chart_changes:
-    runs-on: ["self-hosted", "payments-tribe"]
-    outputs:
-      changeset: ${{ steps.get_changes.outputs.changeset }}
-    steps:
-      - name: "☁️ Check out project code"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
-        with:
-          fetch-depth: 2
-
-      - name: "📝 Get changes from last commit"
-        id: get_changes
-        run: |
-          changeset=false
-          echo "::debug:: last commit raw # $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})"
-          for change in $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}); do
-            parent_dir=$(dirname "$change")
-            echo "::debug::=== change at $parent_dir"
-            if echo $parent_dir | grep -q '.deployment/chart'; then
-               changeset=true
-               echo "::debug:: localted chart change in $change, triggering rebuild"
-               break
-            fi
-          done
-          echo "::set-output name=changeset::${changeset}"
-
-  chart_build:
-    runs-on: ["self-hosted", "payments-tribe"]
-    outputs:
-      chart_version: ${{ steps.package-chart.outputs.chart_version }}
-    needs: [ 'chart_changes' ]
-    if: ${{ needs.changes.outputs.changeset == 'true' }}
-    steps:
-      - name: "☁️ Check out project code"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
-        with:
-          fetch-depth: 0
-
-      - name: "☁️ Check out payments composite actions"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
-        with:
-          repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
-          path: .github/payments-composite-actions
-          ref: 'main'
-
-      - name: "🧪 Test helm chart"
-        uses: ./.github/payments-composite-actions/helm/ct-test
-
-      - name: "📦 Build helm package"
-        id: package-chart
-        uses: ./.github/payments-composite-actions/helm/package
-        with:
-          project_dir: '.'
-          chart_repository: ${{ inputs.chart_repository }}
-
-      - name: "✉️ Send slack message if failed"
-        if: ${{ failure() }}
-        uses: ./.github/payments-composite-actions/notifications/slack-send
-        with:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          slack_channel: ${{ inputs.slack_channel }}
-          color: "danger"
-          message: "Chart Build failed with "
-####
+#   chart_changes:
+#     runs-on: ["self-hosted", "payments-tribe"]
+#     outputs:
+#       changeset: ${{ steps.get_changes.outputs.changeset }}
+#     steps:
+#       - name: "☁️ Check out project code"
+#         # actions checkout v 3.0.2
+#         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+#         with:
+#           fetch-depth: 2
+#
+#       - name: "📝 Get changes from last commit"
+#         id: get_changes
+#         run: |
+#           changeset=false
+#           echo "::debug:: last commit raw # $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})"
+#           for change in $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}); do
+#             parent_dir=$(dirname "$change")
+#             echo "::debug::=== change at $parent_dir"
+#             if echo $parent_dir | grep -q '.deployment/chart'; then
+#                changeset=true
+#                echo "::debug:: localted chart change in $change, triggering rebuild"
+#                break
+#             fi
+#           done
+#           echo "::set-output name=changeset::${changeset}"
+#
+#   chart_build:
+#     runs-on: ["self-hosted", "payments-tribe"]
+#     outputs:
+#       chart_version: ${{ steps.package-chart.outputs.chart_version }}
+#     needs: ['chart_changes']
+#     if: ${{ needs.chart_changes.outputs.changeset == 'true' }}
+#     steps:
+#       - name: "☁️ Check out project code"
+#         # actions checkout v 3.0.2
+#         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+#         with:
+#           fetch-depth: 0
+#
+#       - name: "☁️ Check out payments composite actions"
+#         # actions checkout v 3.0.2
+#         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+#         with:
+#           repository: 'sumup/payments-composite-actions'
+#           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+#           path: .github/payments-composite-actions
+#           ref: 'main'
+#
+#       - name: "🧪 Test helm chart"
+#         uses: ./.github/payments-composite-actions/helm/ct-test
+#
+#       - name: "📦 Build helm package"
+#         id: package-chart
+#         uses: ./.github/payments-composite-actions/helm/package
+#         with:
+#           project_dir: '.'
+#           chart_repository: ${{ inputs.chart_repository }}
+#
+#       - name: "✉️ Send slack message if failed"
+#         if: ${{ failure() }}
+#         uses: ./.github/payments-composite-actions/notifications/slack-send
+#         with:
+#           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+#           slack_channel: ${{ inputs.slack_channel }}
+#           color: "danger"
+#           message: "Chart Build failed with "
+# ####
 ####   Deploy infra update for stage
 ####
   deploy_stage:
     runs-on: ["self-hosted", "payments-tribe"]
-    needs: [ 'application_build', 'chart_build' ]
+    needs: ['application_build', 'chart_build']
     if: always() && needs.application_build.result != 'failure' && needs.chart_build.result != 'failure'
     outputs:
       pr_number: ${{ steps.deploy_infra_update.outputs.pr_number }}
     steps:
       - name: "☁️ Check out project code"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           fetch-depth: 2
 
       - name: "☁️ Check out payments composite actions"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
@@ -217,14 +224,14 @@ jobs:
           deployment_config_path: ${{ inputs.stage_config_path }}
           deployment_environment: "Stage"
           github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
-          chart_version: ${{ needs.chart_build.outputs.chart_version }}
+          # chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
 
       - name: "📝 Stage Deploy info"
         id: stage_deploy_info
         run: |
-          echo "#### To Deploy to Staging please merge  [this PR](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
-      
+          echo "#### To Deploy to Staging please merge this [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
+
       - name: "✉️ Send slack message if failed"
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
@@ -232,24 +239,26 @@ jobs:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
-          message: "Failed to update deploy infra repository"
+          message: "Failed to update deploy infra repository for ${{ inputs.deployment_environment }}"
 ####
 ####   Deploy infra update for prod
 ####
   deploy_prod:
     runs-on: ["self-hosted", "payments-tribe"]
-    needs: [ 'application_build', 'chart_build', 'deploy_stage' ]
+    needs: ['application_build', 'chart_build', 'deploy_stage']
     if: always() && needs.application_build.result != 'failure' && needs.chart_build.result != 'failure' && needs.deploy_stage.result != 'failure'
     outputs:
       pr_number: ${{ steps.deploy_infra_update.outputs.pr_number }}
     steps:
       - name: "☁️ Check out project code"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           fetch-depth: 2
 
       - name: "☁️ Check out payments composite actions"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
@@ -263,14 +272,14 @@ jobs:
           deployment_config_path: ${{ inputs.prod_config_path }}
           deployment_environment: "Prod"
           github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
-          chart_version: ${{ needs.chart_build.outputs.chart_version }}
+          # chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
 
       - name: "📝 Stage Deploy info"
         id: stage_deploy_info
         run: |
-          echo "#### To Deploy to Production please merge  [this PR](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
-      
+          echo "#### To Deploy to Production please merge this [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
+
       - name: "✉️ Send slack message if failed"
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
@@ -278,17 +287,18 @@ jobs:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
-          message: "Failed to update deploy infra repository"
+          message: "Failed to update deploy infra repository for ${{ inputs.deployment_environment }}"
 ####
 ####   Send Slack notification
 ####
   notification:
     runs-on: ["self-hosted", "payments-tribe"]
-    needs: [ 'deploy_stage', 'deploy_prod' ]
+    needs: ['deploy_stage', 'deploy_prod']
     if: always() && needs.deploy_repo.result == 'success'
     steps:
       - name: "☁️ Check out payments composite actions"
-        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
@@ -301,5 +311,4 @@ jobs:
         with:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           color: "good"
-          message: "Build completed. Deploy Infra is updated, [Stage PR](https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_stage.outputs.pr_number }}) , [Production PR](https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_prod.outputs.pr_number }})"
-
+          message: "Build completed. Deploy Infra is updated, Stage Pull Request is https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_stage.outputs.pr_number }} , Production Pull Request is https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_prod.outputs.pr_number }}"
