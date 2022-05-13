@@ -8,7 +8,7 @@ on:
         default: nexus.sam-app.ro:5000
         type: string
       image_name:
-        description: Built image name, defaults to value of Image.name from values.yaml
+        description: Built image name, defaults to value of `Image.name` from `values.yaml`
         required: false
         default: ''
         type: string
@@ -18,17 +18,17 @@ on:
         default: ''
         type: string
       target:
-        description: The build target if image needs to be build to sertain layer ex.builder
+        description: The build target if the image needs to be build to a certain layer e.g. builder
         required: false
         default: 'builder'
         type: string
       test_commands:
-        description: Test commands to run in development container for executing tests, one per line
+        description: The commands to run in the development container for executing tests/linting, one per line
         required: false
         default: ''
         type: string
       results_path:
-        description: The directory ( in the container ) where results will be stored
+        description: The directory(in the container) where the results will be stored
         required: false
         default: /tmp
         type: string
@@ -36,15 +36,15 @@ on:
       #   required: true
       #   type: string
       stage_config_path:
-        description: Path deploy repo Stage configurations
+        description: Deploy repo Stage configurations path
         required: true
         type: string
       prod_config_path:
-        description: Path deploy repo Prod configurations
+        description: Deploy repo Prod configurations  path
         required: true
         type: string
       slack_channel:
-        description: The slack channel where you want your messages being sent
+        description: The Slack channel where you want your notifications being sent
         required: false
         default: ''
         type: string
@@ -82,7 +82,7 @@ jobs:
           target: ${{ inputs.target }}
           ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
 
-      - name: "🧪 Run tests on development container"
+      - name: "🧪 Run tests in development container"
         if: inputs.test_commands != ''
         uses: ./.github/payments-composite-actions/docker/run-builder-tests
         with:
@@ -114,87 +114,17 @@ jobs:
           image_repository: ${{ inputs.image_repository }}
           iam_login: true
 
-      - name: "✉️ Send slack message if failed"
+      - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
-          message: "The Github Actions build has failed for image with "
-####
-####   CHART TEST AND BUILD  <<< this will never trigger ... should use the chart from latest master
-####
-#   chart_changes:
-#     runs-on: ["self-hosted", "payments-tribe"]
-#     outputs:
-#       changeset: ${{ steps.get_changes.outputs.changeset }}
-#     steps:
-#       - name: "☁️ Check out project code"
-#         # actions checkout v 3.0.2
-#         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-#         with:
-#           fetch-depth: 2
-#
-#       - name: "📝 Get changes from last commit"
-#         id: get_changes
-#         run: |
-#           changeset=false
-#           echo "::debug:: last commit raw # $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})"
-#           for change in $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}); do
-#             parent_dir=$(dirname "$change")
-#             echo "::debug::=== change at $parent_dir"
-#             if echo $parent_dir | grep -q '.deployment/chart'; then
-#                changeset=true
-#                echo "::debug:: localted chart change in $change, triggering rebuild"
-#                break
-#             fi
-#           done
-#           echo "::set-output name=changeset::${changeset}"
-#
-#   chart_build:
-#     runs-on: ["self-hosted", "payments-tribe"]
-#     outputs:
-#       chart_version: ${{ steps.package-chart.outputs.chart_version }}
-#     needs: ['chart_changes']
-#     if: ${{ needs.chart_changes.outputs.changeset == 'true' }}
-#     steps:
-#       - name: "☁️ Check out project code"
-#         # actions checkout v 3.0.2
-#         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-#         with:
-#           fetch-depth: 0
-#
-#       - name: "☁️ Check out payments composite actions"
-#         # actions checkout v 3.0.2
-#         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-#         with:
-#           repository: 'sumup/payments-composite-actions'
-#           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
-#           path: .github/payments-composite-actions
-#           ref: 'main'
-#
-#       - name: "🧪 Test helm chart"
-#         uses: ./.github/payments-composite-actions/helm/ct-test
-#
-#       - name: "📦 Build helm package"
-#         id: package-chart
-#         uses: ./.github/payments-composite-actions/helm/package
-#         with:
-#           project_dir: '.'
-#           chart_repository: ${{ inputs.chart_repository }}
-#
-#       - name: "✉️ Send slack message if failed"
-#         if: ${{ failure() }}
-#         uses: ./.github/payments-composite-actions/notifications/slack-send
-#         with:
-#           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-#           slack_channel: ${{ inputs.slack_channel }}
-#           color: "danger"
-#           message: "Chart Build failed with "
-# ####
-####   Deploy infra update for stage
-####
+          message: "The Github Actions build has failed for ${{ steps.build-final-container.outputs.image_full_name }}"
+  ####
+  ####   Deploy infra update for stage
+  ####
   deploy_stage:
     runs-on: ["self-hosted", "payments-tribe"]
     needs: ['application_build', 'chart_build']
@@ -217,7 +147,7 @@ jobs:
           path: .github/payments-composite-actions
           ref: 'main'
 
-      - name: "🚀 Push Changes to Deploy infra repo"
+      - name: "🚀 Push changes to Deploy infra repo"
         id: deploy_infra_update
         uses: ./.github/payments-composite-actions/deploy-infra-update
         with:
@@ -227,22 +157,22 @@ jobs:
           # chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
 
-      - name: "📝 Stage Deploy info"
+      - name: "📝 Stage deployment info"
         id: stage_deploy_info
         run: |
-          echo "#### To Deploy to Staging please merge this [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
+          echo "#### To Deploy to Staging please merge  [this PR](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
 
-      - name: "✉️ Send slack message if failed"
+      - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
-          message: "Failed to update deploy infra repository for ${{ inputs.deployment_environment }}"
-####
-####   Deploy infra update for prod
-####
+          message: "Failed to update the deploy infra repository!"
+  ####
+  ####   Deploy infra update for prod
+  ####
   deploy_prod:
     runs-on: ["self-hosted", "payments-tribe"]
     needs: ['application_build', 'chart_build', 'deploy_stage']
@@ -275,22 +205,22 @@ jobs:
           # chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
 
-      - name: "📝 Stage Deploy info"
-        id: stage_deploy_info
+      - name: "📝 Production deployment info"
+        id: prod_deploy_info
         run: |
-          echo "#### To Deploy to Production please merge this [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
+          echo "#### To Deploy to Production environment please merge this [PR](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
 
-      - name: "✉️ Send slack message if failed"
+      - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
-          message: "Failed to update deploy infra repository for ${{ inputs.deployment_environment }}"
-####
-####   Send Slack notification
-####
+          message: "Failed to update the deploy infra repository!"
+  ####
+  ####   Send Slack notification
+  ####
   notification:
     runs-on: ["self-hosted", "payments-tribe"]
     needs: ['deploy_stage', 'deploy_prod']
@@ -305,10 +235,10 @@ jobs:
           path: .github/payments-composite-actions
           ref: 'main'
 
-      - name: "✉️ Send slack message if successful"
+      - name: "✉️ Send Slack message on succcess"
         if: ${{ success() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           color: "good"
-          message: "Build completed. Deploy Infra is updated, Stage Pull Request is https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_stage.outputs.pr_number }} , Production Pull Request is https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_prod.outputs.pr_number }}"
+          message: "Build completed. Deploy Infra stage PR: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_stage.outputs.pr_number }}, production PR: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_prod.outputs.pr_number }}"
