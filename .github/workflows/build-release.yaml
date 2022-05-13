@@ -7,11 +7,6 @@ on:
         required: false
         default: nexus.sam-app.ro:5000
         type: string
-      image_name:
-        description: Built image name, defaults to value of `Image.name` from `values.yaml`
-        required: false
-        default: ''
-        type: string
       image_tag:
         description: Built image tag, defaults to value of `Image.tag` from `values.yaml`
         required: false
@@ -77,7 +72,6 @@ jobs:
         uses: ./.github/payments-composite-actions/docker/build
         with:
           image_repository: ${{ inputs.image_repository }}
-          image_name: ${{ inputs.image_name }}
           image_tag: ${{ inputs.image_tag }}
           target: ${{ inputs.target }}
           ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
@@ -95,7 +89,6 @@ jobs:
         uses: ./.github/payments-composite-actions/docker/build
         with:
           image_repository: ${{ inputs.image_repository }}
-          image_name: ${{ inputs.image_name }}
           image_tag: ${{ inputs.image_tag }}
           ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
 
