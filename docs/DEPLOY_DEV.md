@@ -38,9 +38,6 @@ jobs:
   - **image_repository**  The image repository for the built images, defaults to value of `Image.repository` from `values.yaml`
       - required No
       - default nexus.sam-app.ro:5000
-  - **image_name**  Built image name, defaults to value of Image.name from values.yaml
-      - required No
-      - default ''
   - **image_tag** Built image tag, defaults to value of `Image.tag` from `values.yaml`
       - required No
       - default ''
