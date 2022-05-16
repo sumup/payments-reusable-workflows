@@ -1,4 +1,4 @@
-name: Build Application,Deploy to Theta
+name: Build Application - Deploy to Stage and Production
 on:
   workflow_call:
     inputs:
