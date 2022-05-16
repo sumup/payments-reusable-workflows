@@ -1,4 +1,4 @@
-name: Build Application,Deploy to theta
+name: Build Application - Deploy to Theta
 on:
   workflow_call:
     inputs:
