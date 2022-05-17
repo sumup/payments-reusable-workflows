@@ -115,7 +115,7 @@ jobs:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
-          message: "The Github Actions build has failed for ${{ steps.build-final-container.outputs.image_full_name }}"
+          message: "The Github Actions build has failed!"
   ####
   ####   CHART TEST AND BUILD
   ####
