@@ -162,8 +162,8 @@ jobs:
   ####
   deploy_stage:
     runs-on: ["self-hosted", "payments-tribe"]
-    needs: ['application_build']
-    if: always() && needs.application_build.result != 'failure' 
+    needs: ['application_build', 'chart_build']
+    if: always() && needs.application_build.result != 'failure' && needs.chart_build.result != 'failure'
     outputs:
       pr_number: ${{ steps.deploy_infra_update.outputs.pr_number }}
     steps:
@@ -189,6 +189,7 @@ jobs:
           deployment_config_path: ${{ inputs.stage_config_path }}
           deployment_environment: "Stage"
           github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
 
       - name: "📝 Stage deployment info"
@@ -209,8 +210,8 @@ jobs:
   ####
   deploy_prod:
     runs-on: ["self-hosted", "payments-tribe"]
-    needs: ['application_build', 'deploy_stage']
-    if: always() && needs.application_build.result != 'failure' && needs.deploy_stage.result != 'failure'
+    needs: ['application_build', 'chart_build', 'deploy_stage']
+    if: always() && needs.application_build.result != 'failure' && needs.chart_build.result != 'failure' && needs.deploy_stage.result != 'failure'
     outputs:
       pr_number: ${{ steps.deploy_infra_update.outputs.pr_number }}
     steps:
@@ -236,6 +237,7 @@ jobs:
           deployment_config_path: ${{ inputs.prod_config_path }}
           deployment_environment: "Prod"
           github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
 
       - name: "📝 Production deployment info"
