@@ -107,6 +107,11 @@ jobs:
           image_repository: ${{ inputs.image_repository }}
           iam_login: true
 
+      - name: "📝 Docker build info"
+        id: docker_build_info
+        run: |
+          echo "#### Build docker image: ${{ steps.build-final-container.outputs.image_tag }}" >> $GITHUB_STEP_SUMMARY
+
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
@@ -114,7 +119,7 @@ jobs:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
-          message: "The Github Actions build has failed for ${{ steps.build-final-container.outputs.image_full_name }}"
+          message: "The Github Actions build has failed!"
   ####
   ####   CHART TEST AND BUILD
   ####
@@ -147,6 +152,11 @@ jobs:
         with:
           project_dir: '.'
           chart_repository: ${{ inputs.chart_repository }}
+
+      - name: "📝 Chart build info"
+        id: chart_build_info
+        run: |
+          echo "#### Build helm chart: ${{ inputs.chart_repository }}/${{ steps.package-chart.outputs.chart_name }}/${{ steps.package-chart.outputs.chart_version }}" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
