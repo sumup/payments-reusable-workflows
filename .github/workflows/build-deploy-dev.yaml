@@ -111,7 +111,7 @@ jobs:
       - name: "📝 Docker build info"
         id: docker_build_info
         run: |
-          echo "#### Build docker image: ${{ steps.build-final-container.outputs.image_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "#### Build docker image: ${{ steps.build-final-container.outputs.image_full_name }}" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
