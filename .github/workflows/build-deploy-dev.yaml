@@ -44,6 +44,11 @@ on:
         required: false
         default: ''
         type: string
+      project_dir:
+        description: The application/project folder relative to git root
+        required: false
+        default: '.'
+        type: string
 
 jobs:
   application_build:
@@ -74,6 +79,7 @@ jobs:
         with:
           image_repository: ${{ inputs.image_repository }}
           image_tag: ${{ inputs.image_tag }}
+          project_dir: ${{ inputs.project_dir }}
           target: ${{ inputs.target }}
           ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
 
@@ -91,6 +97,7 @@ jobs:
         with:
           image_repository: ${{ inputs.image_repository }}
           image_tag: ${{ inputs.image_tag }}
+          project_dir: ${{ inputs.project_dir }}
           ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
 
       - name: "🔍 Scan container"
@@ -180,7 +187,7 @@ jobs:
         id: package-chart
         uses: ./.github/payments-composite-actions/helm/package
         with:
-          project_dir: '.'
+          project_dir: ${{ inputs.project_dir }}
           chart_repository: ${{ inputs.chart_repository }}
 
       - name: "📝 Chart build info"
