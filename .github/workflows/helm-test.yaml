@@ -1,0 +1,71 @@
+name: Test Helm chart
+on:
+  workflow_call:
+    inputs:
+      slack_channel:
+        description: The Slack channel where you want your notifications being sent
+        required: false
+        default: ''
+        type: string
+      project_dir:
+        description: The application/project folder relative to git root
+        required: false
+        default: '.'
+        type: string
+
+jobs:
+  ####
+  ####   CHART TEST
+  ####
+  chart_test:
+    runs-on: ["self-hosted", "payments-tribe"]
+    steps:
+      - name: "☁️ Check out project code"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          fetch-depth: 0
+
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          path: .github/payments-composite-actions
+          ref: 'main'
+
+      - name: "🧪 Test Helm chart"
+        uses: ./.github/payments-composite-actions/helm/ct-test
+
+      - name: "✉️ Send Slack message on failure"
+        if: ${{ failure() }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_channel: ${{ inputs.slack_channel }}
+          color: "danger"
+          message: "The Helm chart tests have failed!"
+  ####
+  ####   Send Slack notification
+  ####
+  notification:
+    runs-on: ["self-hosted", "payments-tribe"]
+    needs: ['chart_test']
+    steps:
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          path: .github/payments-composite-actions
+          ref: 'main'
+
+      - name: "✉️ Send slack message on success"
+        if: ${{ success() }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          color: "good"
+          message: "The application build has completed successfully!"
