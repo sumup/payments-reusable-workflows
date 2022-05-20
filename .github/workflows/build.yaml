@@ -22,6 +22,11 @@ on:
         required: false
         default: ''
         type: string
+      project_dir:
+        description: The application/project folder relative to git root
+        required: false
+        default: '.'
+        type: string
 
 jobs:
   application_build:
@@ -48,6 +53,7 @@ jobs:
         uses: ./.github/payments-composite-actions/docker/build
         with:
           target: ${{ inputs.target }}
+          project_dir: ${{ inputs.project_dir }}
           ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
 
       - name: "🧪 Run tests in development container"
@@ -62,6 +68,7 @@ jobs:
         id: build-final-container
         uses: ./.github/payments-composite-actions/docker/build
         with:
+          project_dir: ${{ inputs.project_dir }}
           ssh_agent_key: ${{ secrets.ACTIONS_SSH_AGENT_KEY }}
 
       - name: "🔍 Scan container"
