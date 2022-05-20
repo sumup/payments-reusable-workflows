@@ -1,4 +1,4 @@
-name: Build Helm chart
+name: Test Helm chart
 on:
   workflow_call:
     inputs:
@@ -51,7 +51,7 @@ jobs:
   ####
   notification:
     runs-on: ["self-hosted", "payments-tribe"]
-    needs: [ 'application_build', 'chart_test' ]
+    needs: ['chart_test']
     steps:
       - name: "☁️ Check out payments composite actions"
         # actions checkout v 3.0.2
