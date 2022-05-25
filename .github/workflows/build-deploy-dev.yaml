@@ -67,10 +67,10 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions@0.1.0'
+          repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
-          ref: 'main'
+          ref: '0.1.0'
 
       - name: "📦 Build development container"
         id: build-development-container
@@ -148,10 +148,10 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions@0.1.0'
+          repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
-          ref: 'main'
+          ref: '0.1.0'
 
       - name: "🧪 Test Helm chart"
         uses: ./.github/payments-composite-actions/helm/ct-test
@@ -205,10 +205,10 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions@0.1.0'
+          repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
-          ref: 'main'
+          ref: '0.1.0'
 
       - name: "🚀 Push changes to deploy infra repo"
         id: deploy_infra_update
@@ -246,10 +246,10 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions@0.1.0'
+          repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
-          ref: 'main'
+          ref: '0.1.0'
 
       - name: "✉️ Send Slack message on success"
         if: ${{ success() }}
