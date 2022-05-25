@@ -66,7 +66,7 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions'
+          repository: 'sumup/payments-composite-actions@0.1.0'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
@@ -147,7 +147,7 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions'
+          repository: 'sumup/payments-composite-actions@0.1.0'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
@@ -204,7 +204,7 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions'
+          repository: 'sumup/payments-composite-actions@0.1.0'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
@@ -222,7 +222,7 @@ jobs:
       - name: "📝 Stage deployment info"
         id: stage_deploy_info
         run: |
-          echo "#### [Staging] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
+          echo "#### [Staging] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }}) :rocket:" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
@@ -252,7 +252,7 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions'
+          repository: 'sumup/payments-composite-actions@0.1.0'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
@@ -270,7 +270,7 @@ jobs:
       - name: "📝 Production deployment info"
         id: prod_deploy_info
         run: |
-          echo "#### [Production] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
+          echo "#### [Production] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }}) :rocket:" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
@@ -291,7 +291,7 @@ jobs:
         # actions checkout v 3.0.2
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
-          repository: 'sumup/payments-composite-actions'
+          repository: 'sumup/payments-composite-actions@0.1.0'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
           ref: 'main'
