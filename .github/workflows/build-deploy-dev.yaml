@@ -158,7 +158,7 @@ jobs:
         id: package-chart
         uses: ./.github/payments-composite-actions/helm/package
         with:
-          project_dir:${{ inputs.project_dir }}
+          project_dir: ${{ inputs.project_dir }}
       
       - name: "📦 Push Helm package"
         id: push-chart
