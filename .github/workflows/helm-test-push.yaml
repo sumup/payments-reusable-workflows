@@ -1,4 +1,4 @@
-name: Build Helm Chart, Push and Deploy
+name: Test Helm Chart, Push and Deploy
 on:
   workflow_call:
     inputs:
@@ -30,6 +30,7 @@ jobs:
     runs-on: ["self-hosted", "payments-tribe"]
     outputs:
       chart_version: ${{ steps.package-chart.outputs.chart_version }}
+      chart_exist: ${{ steps.push-chart.outputs.chart_exist }}
     steps:
       - name: "☁️ Check out project code"
         # actions checkout v 3.0.2
@@ -44,7 +45,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
-          ref: '0.1.1'
+          ref: '0.1.2'
 
       - name: "🧪 Test Helm chart"
         uses: ./.github/payments-composite-actions/helm/ct-test
@@ -84,7 +85,7 @@ jobs:
   deploy_repo:
     runs-on: ["self-hosted", "payments-tribe"]
     needs: ['chart_build']
-    if: always() && needs.chart_build.result != 'failure'
+    if: always() && needs.chart_build.result != 'failure' && needs.chart_build.outputs.chart_exist != 'false'
     outputs:
       pr_number: ${{ steps.deploy_infra_update.outputs.pr_number }}
     steps:
@@ -101,7 +102,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
-          ref: '0.1.1'
+          ref: '0.1.2'
 
       - name: "🚀 Push changes to deploy infra repo"
         id: deploy_infra_update
@@ -141,7 +142,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_PAT }}
           path: .github/payments-composite-actions
-          ref: '0.1.1'
+          ref: '0.1.2'
 
       - name: "✉️ Send Slack message on success"
         if: ${{ success() }}
