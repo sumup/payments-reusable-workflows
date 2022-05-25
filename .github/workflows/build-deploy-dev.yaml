@@ -223,7 +223,7 @@ jobs:
       - name: "📝 Development deployment info"
         id: development_deploy_info
         run: |
-          echo "#### [${{ inputs.deployment_environment }}] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
+          echo "#### [${{ inputs.deployment_environment }}] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }}) :rocket:" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
