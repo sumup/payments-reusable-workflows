@@ -13,7 +13,7 @@ In order to use these workflows you need to add secret for slack webhook named `
  - Simplest possible example:
 
 ```yaml
-name: Build,Test,Deploy to Theta
+name: Build, Test and Deploy to Theta
 on:  
   push:
     branches:
@@ -60,4 +60,6 @@ jobs:
   - **slack_channel** The slack channel where you want your messages being sent
       - required No
       - default ''
-
+  - **project_dir** The application/project folder relative to git root 
+      - required No
+      - default '.'

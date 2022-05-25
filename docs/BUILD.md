@@ -42,4 +42,6 @@ jobs:
   - **slack_channel** The slack channel where you want your messages being sent
       - required No
       - default ''
-
+  - **project_dir** The application/project folder relative to git root 
+      - required No
+      - default '.'
