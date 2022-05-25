@@ -26,42 +26,10 @@ on:
         type: string
 
 jobs:
-  ####
-  ####   CHART TEST AND BUILD
-  ####
-  chart_changes:
-    runs-on: ["self-hosted", "payments-tribe"]
-    outputs:
-      changeset: ${{ steps.get_changes.outputs.changeset }}
-    steps:
-      - name: "☁️ Check out project code"
-        # actions checkout v 3.0.2
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-        with:
-          fetch-depth: 2
-
-      - name: "📝 Get changes from last commit"
-        id: get_changes
-        run: |
-          changeset=false
-          echo "::debug:: last commit raw # $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})"
-          for change in $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}); do
-            parent_dir=$(dirname "$change")
-            echo "::debug::=== change at $parent_dir"
-            if echo $parent_dir | grep -q '.deployment/chart'; then
-               changeset=true
-               echo "::debug:: located chart change in $change, triggering rebuild"
-               break
-            fi
-          done
-          echo "::set-output name=changeset::${changeset}"
-
   chart_build:
     runs-on: ["self-hosted", "payments-tribe"]
     outputs:
       chart_version: ${{ steps.package-chart.outputs.chart_version }}
-    needs: ['chart_changes']
-    if: ${{ needs.chart_changes.outputs.changeset == 'true' }}
     steps:
       - name: "☁️ Check out project code"
         # actions checkout v 3.0.2
