@@ -54,7 +54,15 @@ jobs:
         uses: ./.github/payments-composite-actions/helm/package
         with:
           project_dir: ${{ inputs.project_dir }}
+
+      - name: "📦 Push Helm package"
+        id: push-chart
+        uses: ./.github/payments-composite-actions/helm/push
+        with:
           chart_repository: ${{ inputs.chart_repository }}
+          chart_name: ${{ steps.package-chart.outputs.chart_name }}
+          chart_package_filename: ${{ steps.package-chart.outputs.chart_package_filename }}
+          chart_package_path: ${{ steps.package-chart.outputs.chart_package_path }}
 
       - name: "📝 Chart build info"
         id: chart_build_info
