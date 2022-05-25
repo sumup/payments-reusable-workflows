@@ -135,8 +135,6 @@ jobs:
     runs-on: ["self-hosted", "payments-tribe"]
     outputs:
       chart_version: ${{ steps.package-chart.outputs.chart_version }}
-    needs: ['chart_changes']
-    if: ${{ needs.chart_changes.outputs.changeset == 'true' }}
     steps:
       - name: "☁️ Check out project code"
         # actions checkout v 3.0.2
