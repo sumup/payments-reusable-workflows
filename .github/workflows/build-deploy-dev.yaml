@@ -166,7 +166,7 @@ jobs:
         with:
           chart_repository: ${{ inputs.chart_repository }}
           chart_name: ${{ steps.package-chart.outputs.chart_name }}
-          chart_version: ${{ steps.package-chart.outputs.chart_version }}
+          chart_package_filename: ${{ steps.package-chart.outputs.chart_package_filename }}
           chart_package_path: ${{ steps.package-chart.outputs.chart_package_path }}
 
       - name: "📝 Chart build info"
