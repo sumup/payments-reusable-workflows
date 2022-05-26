@@ -43,9 +43,9 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.1.4'
+          ref: '0.1.5'
 
       - name: "🧪 Test Helm chart"
         uses: ./.github/payments-composite-actions/helm/ct-test
@@ -74,7 +74,7 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
           message: "Building Helm package has failed!"
@@ -100,9 +100,9 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.1.4'
+          ref: '0.1.5'
 
       - name: "🚀 Push changes to deploy infra repo"
         id: deploy_infra_update
@@ -110,7 +110,7 @@ jobs:
         with:
           deployment_config_path: ${{ inputs.deployment_config_path }}
           deployment_environment: ${{ inputs.deployment_environment }}
-          github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          github_token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           chart_version: ${{ needs.chart_build.outputs.chart_version }}
 
       - name: "📝 Development deployment info"
@@ -122,7 +122,7 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
           message: "Failed to update the deploy infra repository!"
@@ -140,14 +140,14 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.1.4'
+          ref: '0.1.5'
 
       - name: "✉️ Send Slack message on success"
         if: ${{ success() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
           color: "good"
           message: "Build completed successfully. Deploy infra pull request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_repo.outputs.pr_number }}"

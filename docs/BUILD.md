@@ -4,7 +4,10 @@ Builds image from Dockerfiles located in .deployment/docker sub-directory
 
 Used in PR or on push to branch ( not main/master )
 
-In order to use these workflows you need to add secret for slack webhook named `SLACK_WEBHOOK_URL` in your repo
+In order to receive Slack notifications in your channel:
+```
+/invite @github_actions_ci 
+```
 
 #### Example usage
 
