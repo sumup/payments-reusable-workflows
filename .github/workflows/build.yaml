@@ -43,9 +43,9 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.1.4'
+          ref: '0.1.5'
 
       - name: "📦 Build development container"
         id: build-development-container
@@ -75,14 +75,14 @@ jobs:
         id: call-scan-container
         uses: ./.github/payments-composite-actions/docker/trivy-scan
         with:
-          github_token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          github_token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           image_full_name: ${{ steps.build-final-container.outputs.image_full_name }}
 
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
           message: "The Github Actions build has failed!"
@@ -103,18 +103,20 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.1.4'
+          ref: '0.1.5'
 
       - name: "🧪 Test Helm chart"
         uses: ./.github/payments-composite-actions/helm/ct-test
+        with:
+          project_dir: ${{ inputs.project_dir }}
 
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "danger"
           message: "The Helm chart tests have failed!"
@@ -130,14 +132,14 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
           repository: 'sumup/payments-composite-actions'
-          token: ${{ secrets.GH_ACTIONS_CI_PAT }}
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.1.4'
+          ref: '0.1.5'
 
       - name: "✉️ Send slack message on success"
         if: ${{ success() }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
           color: "good"
           message: "The application build has completed successfully!"
