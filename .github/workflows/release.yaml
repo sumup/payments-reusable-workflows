@@ -97,4 +97,4 @@ jobs:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "good"
-          message: "Build completed. [Stage] Pull Request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_stage.outputs.pr_number }}, [Production] Pull Request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_prod.outputs.pr_number }}"
+          message: "Build completed. [Production] Pull Request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_prod.outputs.pr_number }}"
