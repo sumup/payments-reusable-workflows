@@ -1,0 +1,99 @@
+name: Release to Production
+on:
+  workflow_call:
+    inputs:
+      prod_config_path:
+        description: Deploy repo Prod configurations  path
+        required: true
+        type: string
+      slack_channel:
+        description: The Slack channel where you want your notifications being sent
+        required: false
+        default: ''
+        type: string
+      project_dir:
+        description: The application/project folder relative to git root
+        required: false
+        default: '.'
+        type: string
+
+jobs:
+  ####
+  ####   Deploy infra update for prod
+  ####
+  deploy_prod:
+    runs-on: ["self-hosted", "payments-tribe"]
+    outputs:
+      pr_number: ${{ steps.deploy_infra_update.outputs.pr_number }}
+    steps:
+      - name: "☁️ Check out project code"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          fetch-depth: 2
+
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
+          path: .github/payments-composite-actions
+          ref: '0.1.5'
+
+      - name: "☁️ Collect image and chart versions"
+        shell: bash
+        run: |
+          image_tag=$(yq '.Image.tag' ${{ inputs.project_dir}}/.deployment/chart/values.yaml | tr -d '"')-${{ github.sha }}
+          chart_version=$(yq '.version' Chart.yaml | tr -d '"')
+          echo "::set-output name=chart_version::${chart_version}"
+          echo "::set-output name=image_tag::${image_tag}"
+
+      - name: "🚀 Push Changes to Deploy infra repo"
+        id: deploy_infra_update
+        uses: ./.github/payments-composite-actions/deploy-infra-update
+        with:
+          deployment_config_path: ${{ inputs.prod_config_path }}
+          deployment_environment: "Prod"
+          github_token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
+          chart_version: ${{ steps.versions_collect.outputs.chart_version }}
+          image_tag: ${{ steps.versions_collect.outputs.image_tag }}
+
+      - name: "📝 Production deployment info"
+        id: prod_deploy_info
+        run: |
+          echo "#### [Production] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }}) :rocket:" >> $GITHUB_STEP_SUMMARY
+
+      - name: "✉️ Send Slack message on failure"
+        if: ${{ failure() }} && ${{ inputs.slack_channel != '' }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
+          slack_channel: ${{ inputs.slack_channel }}
+          color: "danger"
+          message: "Failed to update the deploy infra repository!"
+  ####
+  ####   Send Slack notification
+  ####
+  notification:
+    runs-on: ["self-hosted", "payments-tribe"]
+    needs: ['deploy_prod']
+    if: ${{ inputs.slack_channel != '' }}
+    steps:
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
+          path: .github/payments-composite-actions
+          ref: '0.1.5'
+
+      - name: "✉️ Send Slack message on succcess"
+        if: ${{ success() }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
+          slack_channel: ${{ inputs.slack_channel }}
+          color: "good"
+          message: "Build completed. [Stage] Pull Request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_stage.outputs.pr_number }}, [Production] Pull Request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_prod.outputs.pr_number }}"
