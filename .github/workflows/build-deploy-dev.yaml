@@ -254,5 +254,6 @@ jobs:
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
+          slack_channel: ${{ inputs.slack_channel }}
           color: "good"
           message: "Build completed successfully. Deploy infra pull request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_repo.outputs.pr_number }}"
