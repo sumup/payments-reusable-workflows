@@ -109,6 +109,8 @@ jobs:
 
       - name: "🧪 Test Helm chart"
         uses: ./.github/payments-composite-actions/helm/ct-test
+        with:
+          project_dir: ${{ inputs.project_dir }}
 
       - name: "✉️ Send Slack message on failure"
         if: ${{ failure() }}
