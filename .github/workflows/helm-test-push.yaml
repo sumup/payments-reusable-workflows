@@ -71,7 +71,7 @@ jobs:
           echo "#### Build helm chart: ${{ inputs.chart_repository }}/${{ steps.package-chart.outputs.chart_name }}/${{ steps.package-chart.outputs.chart_version }}" >> $GITHUB_STEP_SUMMARY
       
       - name: "✉️ Send Slack message on failure"
-        if: ${{ failure() }}
+        if: ${{ failure() }} && ${{ inputs.slack_channel }} != ''
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
@@ -119,7 +119,7 @@ jobs:
           echo "#### [${{ inputs.deployment_environment }}] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
-        if: ${{ failure() }}
+        if: ${{ failure() }} && ${{ inputs.slack_channel }} != ''
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
@@ -133,7 +133,7 @@ jobs:
   notification:
     runs-on: ["self-hosted", "payments-tribe"]
     needs: [ 'deploy_repo' ]
-    if: always() && needs.deploy_repo.result == 'success'
+    if: always() && needs.deploy_repo.result == 'success' && ${{ inputs.slack_channel }} != ''
     steps:
       - name: "☁️ Check out payments composite actions"
         # actions checkout v 3.0.2
