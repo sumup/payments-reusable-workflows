@@ -42,6 +42,7 @@ jobs:
           ref: '0.1.5'
 
       - name: "☁️ Collect image and chart versions"
+        id: versions_collect
         shell: bash
         run: |
           image_tag=$(yq '.Image.tag' ${{ inputs.project_dir}}/.deployment/chart/values.yaml | tr -d '"')-${{ github.sha }}
