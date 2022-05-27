@@ -109,7 +109,7 @@ jobs:
           echo "#### Build docker image: ${{ steps.build-final-container.outputs.image_full_name }}" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
-        if: ${{ failure() }} && ${{ inputs.slack_channel }} != ''
+        if: ${{ failure() }} && ${{ inputs.slack_channel != '' }}
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
@@ -124,7 +124,7 @@ jobs:
   notification:
     runs-on: ["self-hosted", "payments-tribe"]
     needs: [ 'application_build']
-    if: ${{ inputs.slack_channel }} != ''
+    if: ${{ inputs.slack_channel != '' }}
     steps:
       - name: "☁️ Check out payments composite actions"
         # actions checkout v 3.0.2
