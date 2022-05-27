@@ -45,7 +45,7 @@ jobs:
         shell: bash
         run: |
           image_tag=$(yq '.Image.tag' ${{ inputs.project_dir}}/.deployment/chart/values.yaml | tr -d '"')-${{ github.sha }}
-          chart_version=$(yq '.version' Chart.yaml | tr -d '"')
+          chart_version=$(yq '.version' ${{ inputs.project_dir}}/.deployment/chart/Chart.yaml | tr -d '"')
           echo "::set-output name=chart_version::${chart_version}"
           echo "::set-output name=image_tag::${image_tag}"
 
