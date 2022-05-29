@@ -45,7 +45,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.1.5'
+          ref: 'testing-gha-build-caching'
 
       - name: "📦 Build development container"
         id: build-development-container
