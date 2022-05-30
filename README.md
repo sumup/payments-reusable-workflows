@@ -5,7 +5,9 @@ This repository contains Payments GH Actions reusable workflows
 
 [Build workflow](docs/BUILD.md)
 
-[Development workflow](docs/DEPLOY_DEV.md)
+[Development workflow](docs/BUILD_DEPLOY_DEV.md)
+
+[Build and Release workflow](docs/BUILD_RELEASE.md)
 
 [Release workflow](docs/RELEASE.md)
 
