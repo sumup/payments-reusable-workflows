@@ -79,7 +79,7 @@ jobs:
           image_full_name: ${{ steps.build-final-container.outputs.image_full_name }}
 
       - name: "✉️ Send Slack message on failure"
-        if: ${{ failure() }} && ${{ inputs.slack_channel }} != ''
+        if: failure() && inputs.slack_channel != ''
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
@@ -113,7 +113,7 @@ jobs:
           project_dir: ${{ inputs.project_dir }}
 
       - name: "✉️ Send Slack message on failure"
-        if: ${{ failure() }} && ${{ inputs.slack_channel != '' }}
+        if: failure() && inputs.slack_channel != ''
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
@@ -126,7 +126,7 @@ jobs:
   notification:
     runs-on: ["self-hosted", "payments-tribe"]
     needs: [ 'application_build', 'chart_test' ]
-    if: ${{ inputs.slack_channel != '' }}
+    if: inputs.slack_channel != ''
     steps:
       - name: "☁️ Check out payments composite actions"
         # actions checkout v 3.0.2
@@ -138,7 +138,7 @@ jobs:
           ref: '0.1.5'
 
       - name: "✉️ Send slack message on success"
-        if: ${{ success() }}
+        if: success()
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
