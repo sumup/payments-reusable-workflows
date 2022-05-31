@@ -1,6 +1,6 @@
-## Deploy prod env
+## Deploy to Environment
 
-- Creates PR in deploy repo for prod env
+- Creates PR in deploy repo for Environment
 
 Used on release
 
@@ -14,7 +14,7 @@ In order to receive Slack notifications in your channel:
  - Simplest possible example:
 
 ```yaml
-name: Deploy to Prod
+name: Deploy to Environment
 on:  
   push:
     branches:
@@ -24,13 +24,16 @@ jobs:
   release:
     uses: sumup/payments-reusable-workflows/.github/workflows/release.yaml
     with:
-      prod_config_path: projects/my-team/my-app/values-prod.yaml
+      environment_config_path: projects/my-team/my-app/values-prod.yaml
     secrets: inherit
-
+  
 ```
 
 #### Inputs
-  - **prod_config_path**  Path to configuration file for prod env
+  - ** environment_name** Name of the environment 
+      - required No
+      - default Prod
+  - ** environment_config_path**  Path to configuration file for environment
       - required Yes
   - **slack_channel** The slack channel where you want your messages being sent
       - required No
