@@ -119,7 +119,7 @@ jobs:
           echo "#### [${{ inputs.deployment_environment }}] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }})" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
-        if: failure() && ${{ inputs.slack_channel != ''
+        if: failure() && inputs.slack_channel != ''
         uses: ./.github/payments-composite-actions/notifications/slack-send
         with:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
