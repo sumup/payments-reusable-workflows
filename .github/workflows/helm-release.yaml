@@ -1,0 +1,102 @@
+name: Release helm to Environment
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        description: The deployment environment
+        default: 'Prod'
+        required: false
+        type: string
+      environment_config_path:
+        description: Deploy repo environment configurations path
+        required: true
+        type: string
+      slack_channel:
+        description: The Slack channel where you want your notifications being sent
+        required: false
+        default: ''
+        type: string
+      project_dir:
+        description: The application/project folder relative to git root
+        required: false
+        default: '.'
+        type: string
+
+jobs:
+  ####
+  ####   Deploy infra update for environment
+  ####
+  deploy:
+    runs-on: ["self-hosted", "payments-tribe"]
+    outputs:
+      pr_number: ${{ steps.deploy_infra_update.outputs.pr_number }}
+    steps:
+      - name: "☁️ Check out project code"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          fetch-depth: 2
+
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
+          path: .github/payments-composite-actions
+          ref: '0.2.0'
+
+      - name: "☁️ Collect image and chart versions"
+        id: versions_collect
+        shell: bash
+        run: |
+          chart_version=$(yq '.version' ${{ inputs.project_dir}}/.deployment/chart/Chart.yaml | tr -d '"')
+          echo "::set-output name=chart_version::${chart_version}"
+
+      - name: "🚀 Push Changes to Deploy infra repo"
+        id: deploy_infra_update
+        uses: ./.github/payments-composite-actions/deploy-infra-update
+        with:
+          deployment_config_path: ${{ inputs.environment_config_path }}
+          deployment_environment: ${{ inputs.environment_name }}
+          github_token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
+          chart_version: ${{ steps.versions_collect.outputs.chart_version }}
+
+      - name: "📝 Environment deployment info"
+        id: environment_deploy_info
+        run: |
+          echo "#### [${{ inputs.environment_name }}] To Deploy please merge [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }}) :rocket:" >> $GITHUB_STEP_SUMMARY
+
+      - name: "✉️ Send Slack message on failure"
+        if: ${{ failure() }} && ${{ inputs.slack_channel != '' }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
+          slack_channel: ${{ inputs.slack_channel }}
+          color: "danger"
+          message: "Failed to update the deploy infra repository!"
+  ####
+  ####   Send Slack notification
+  ####
+  notification:
+    runs-on: ["self-hosted", "payments-tribe"]
+    needs: ['deploy']
+    if: ${{ inputs.slack_channel != '' }}
+    steps:
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
+          path: .github/payments-composite-actions
+          ref: '0.2.0'
+
+      - name: "✉️ Send Slack message on succcess"
+        if: ${{ success() }}
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
+          slack_channel: ${{ inputs.slack_channel }}
+          color: "good"
+          message: "Build completed. [${{ inputs.environment_name }}] Pull Request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy.outputs.pr_number }}"
