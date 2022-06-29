@@ -217,6 +217,7 @@ jobs:
           github_token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
+          auto_merge: "true"
 
       - name: "📝 Development deployment info"
         id: development_deploy_info
@@ -256,4 +257,4 @@ jobs:
           slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
           slack_channel: ${{ inputs.slack_channel }}
           color: "good"
-          message: "Build completed successfully. Deploy infra pull request: https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_repo.outputs.pr_number }}"
+          message: "Build completed successfully. Deploy infra pull request [merged] : https://github.com/sumup/deploy-infra/pull/${{ needs.deploy_repo.outputs.pr_number }}"
