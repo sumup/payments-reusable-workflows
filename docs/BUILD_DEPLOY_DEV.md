@@ -2,7 +2,8 @@
 
 - Builds image from Dockerfiles located in .deployment/docker sub-directory
 - Tests and Packages helm chart
-- Creates and Merge PR in deploy repo for development env 
+- Creates PR in deploy repo for development env 
+- Option to merge PR in deploy repo for development env 
 
 Used on push to main/master branch
 
