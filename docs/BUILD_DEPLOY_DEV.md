@@ -3,6 +3,7 @@
 - Builds image from Dockerfiles located in .deployment/docker sub-directory
 - Tests and Packages helm chart
 - Creates PR in deploy repo for development env 
+- Option to merge PR in deploy repo for development env 
 
 Used on push to main/master branch
 
@@ -30,6 +31,30 @@ jobs:
       slack_channel: "channel"
       deployment_config_path: projects/my-team/my-app/values-theta.yaml
       chart_repository: s3://helm-charts/my-team/
+      test_commands: |
+        go run mage.go -v lint
+        go run mage.go -v test
+    secrets: inherit
+
+```
+ - With deployment repo PR auto-merge example:
+
+```yaml
+name: Build, Test and Deploy to Theta
+on:  
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-dev:
+    uses: sumup/payments-reusable-workflows/.github/workflows/build-deploy-dev.yaml
+    with:
+      image_repository: nexus.sam-app.ro:5001
+      slack_channel: "channel"
+      deployment_config_path: projects/my-team/my-app/values-theta.yaml
+      chart_repository: s3://helm-charts/my-team/
+      auto_merge: 'true'
       test_commands: |
         go run mage.go -v lint
         go run mage.go -v test
@@ -66,3 +91,6 @@ jobs:
   - **project_dir** The application/project folder relative to git root 
       - required No
       - default '.'
+  - **auto_merge** Auto merge the created PR. Will not by default
+      - required No
+      - default ''
