@@ -44,7 +44,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.2.0'
+          ref: '0.3.0'
 
       - name: "☁️ Collect image and chart versions"
         id: versions_collect
@@ -90,7 +90,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.2.0'
+          ref: '0.3.0'
 
       - name: "✉️ Send Slack message on succcess"
         if: ${{ success() }}

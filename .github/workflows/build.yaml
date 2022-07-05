@@ -45,7 +45,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.2.0'
+          ref: '0.3.0'
 
       - name: "📦 Build development container"
         id: build-development-container
@@ -105,7 +105,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.2.0'
+          ref: '0.3.0'
 
       - name: "🧪 Test Helm chart"
         uses: ./.github/payments-composite-actions/helm/ct-test
@@ -135,7 +135,7 @@ jobs:
           repository: 'sumup/payments-composite-actions'
           token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           path: .github/payments-composite-actions
-          ref: '0.2.0'
+          ref: '0.3.0'
 
       - name: "✉️ Send slack message on success"
         if: success()
