@@ -49,6 +49,11 @@ on:
         required: false
         default: '.'
         type: string
+      auto_merge:
+        description: Auto merge the created PR. Will not by default
+        required: false
+        default: ''
+        type: string
 
 jobs:
   application_build:
@@ -217,12 +222,12 @@ jobs:
           github_token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
           chart_version: ${{ needs.chart_build.outputs.chart_version }}
           image_tag: ${{ needs.application_build.outputs.image_tag }}
-          auto_merge: "true"
+          auto_merge: ${{ inputs.auto_merge }}
 
       - name: "📝 Development deployment info"
         id: development_deploy_info
         run: |
-          echo "#### [${{ inputs.deployment_environment }}] Merged [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }}) :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "#### [${{ inputs.deployment_environment }}] [Pull Request](https://github.com/sumup/deploy-infra/pull/${{ steps.deploy_infra_update.outputs.pr_number }}) :rocket:" >> $GITHUB_STEP_SUMMARY
 
       - name: "✉️ Send Slack message on failure"
         if: failure() && inputs.slack_channel != ''

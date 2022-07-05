@@ -36,6 +36,30 @@ jobs:
     secrets: inherit
 
 ```
+ - With deployment repo PR auto-merge example:
+
+```yaml
+name: Build, Test and Deploy to Theta
+on:  
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-dev:
+    uses: sumup/payments-reusable-workflows/.github/workflows/build-deploy-dev.yaml
+    with:
+      image_repository: nexus.sam-app.ro:5001
+      slack_channel: "channel"
+      deployment_config_path: projects/my-team/my-app/values-theta.yaml
+      chart_repository: s3://helm-charts/my-team/
+      auto_merge: 'true'
+      test_commands: |
+        go run mage.go -v lint
+        go run mage.go -v test
+    secrets: inherit
+
+```
 
 #### Inputs
   - **image_repository**  The image repository for the built images, defaults to value of `Image.repository` from `values.yaml`
@@ -66,3 +90,6 @@ jobs:
   - **project_dir** The application/project folder relative to git root 
       - required No
       - default '.'
+  - **auto_merge** Auto merge the created PR. Will not by default
+      - required No
+      - default ''
