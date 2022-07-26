@@ -46,7 +46,7 @@ jobs:
           path: .github/payments-composite-actions
           ref: '0.3.0'
 
-      - name: "☁️ Collect image and chart versions"
+      - name: "📝 Collect image and chart versions"
         id: versions_collect
         shell: bash
         run: |

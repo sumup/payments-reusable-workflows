@@ -37,10 +37,67 @@ on:
         required: false
         default: '.'
         type: string
+      enable_commitlint:
+        description: Enables commit linting
+        required: false
+        default: ''
+        type: string
+      commitlint_help_url:
+        description: "A help URL to a page explaining your commit message conventions"
+        required: false
+        default: "https://github.com/conventional-changelog/commitlint/#what-is-commitlint"
+        type: string
+      commitlint_config_path:
+        description: "Configuration file for the commit lint action. Default: .commitlint.config.js"
+        required: false
+        default: ".commitlint.config.js"
+        type: string
+      commitlint_fail_on_warning:
+        description: "Fails commitlint on warning"
+        required: false
+        default: true
+        type: string
 
 jobs:
+  lint:
+    if: inputs.enable_commitlint != '' && inputs.enable_commitlint != 'false'
+    runs-on: ["self-hosted","payments-tribe"]
+    steps:
+      - name: "☁️ Check out project code"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          fetch-depth: 0
+
+      - name: "☁️ Check out payments composite actions"
+        # actions checkout v 3.0.2
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          repository: 'sumup/payments-composite-actions'
+          token: ${{ secrets.GH_ACTIONS_CI_TOKEN }}
+          path: .github/payments-composite-actions
+          ref: '0.3.0'
+
+      - name: "🔍 Lint commit messages"
+        uses: ./.github/payments-composite-actions/lint/commit-lint
+        with:
+          config_path: ${{ inputs.commitlint_config_path }}
+          help_url: ${{ inputs.commitlint_help_url }}
+          fail_on_warning: ${{ inputs.commitlint_fail_on_warning }}
+
+      - name: "✉️ Send Slack message on failure"
+        if: failure() && inputs.slack_channel != ''
+        uses: ./.github/payments-composite-actions/notifications/slack-send
+        with:
+          slack_bot_token: ${{ secrets.GH_ACTIONS_SLACK_TOKEN }}
+          slack_channel: ${{ inputs.slack_channel }}
+          color: "danger"
+          message: "Failed linting commit message!"
+
   application_build:
     runs-on: [ "self-hosted", "payments-tribe" ]
+    needs: [ "lint" ]
+    if: always() && (needs.lint.result == 'success' || needs.lint.result == 'skipped')
     outputs:
       image_tag: ${{ steps.build-final-container.outputs.image_tag }}
       imageSha: ${{ steps.build-final-container.outputs.imageSha }}

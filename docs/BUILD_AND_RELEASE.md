@@ -1,5 +1,5 @@
 # Build,Test and Deploy Application to stage and prod env
-
+- Lints commit mesages(could be skipped)
 - Builds image from Dockerfiles located in .deployment/docker sub-directory
 - Tests and Packages helm chart
 - Creates PR in deploy repo for stage and prod env
@@ -69,4 +69,15 @@ jobs:
   - **project_dir** The application/project folder relative to git root 
       - required No
       - default '.'
-
+  - **enable_commitlint** Enables commit linting
+      - default ''
+      - required No
+  - **commitlint_help_url** A help URL to a page explaining your commit message conventions
+      - required No
+      - default "https://github.com/conventional-changelog/commitlint/#what-is-commitlint"
+  - **commitlint_config_path** Configuration file for the commit lint action. Default: .commitlint.config.js
+      - required No
+      - default ".commitlint.config.js"
+  - **commitlint_fail_on_warning** Fails commitlint on warning
+      - required No
+      - default true
